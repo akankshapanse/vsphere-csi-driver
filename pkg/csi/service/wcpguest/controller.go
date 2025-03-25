@@ -58,6 +58,7 @@ import (
 	"sigs.k8s.io/vsphere-csi-driver/v3/pkg/csi/service/logger"
 	csitypes "sigs.k8s.io/vsphere-csi-driver/v3/pkg/csi/types"
 	k8s "sigs.k8s.io/vsphere-csi-driver/v3/pkg/kubernetes"
+	cnsoperatortypes "sigs.k8s.io/vsphere-csi-driver/v3/pkg/syncer/cnsoperator/types"
 )
 
 var (
@@ -512,6 +513,25 @@ func (c *controller) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequ
 				volumeType = prometheus.PrometheusFileVolumeType
 			}
 		}
+		// Remove the finalizer before deleting the Supervisor PVC
+		for i, finalizer := range svPVC.ObjectMeta.Finalizers {
+			if finalizer == cnsoperatortypes.CNSPvcFinalizer {
+				log.Debugf("Removing %q finalizer from PersistentVolumeClaim with name: %q on namespace: %q",
+					cnsoperatortypes.CNSPvcFinalizer, svPVC.Name, svPVC.Namespace)
+				svPVC.ObjectMeta.Finalizers = append(svPVC.ObjectMeta.Finalizers[:i], svPVC.ObjectMeta.Finalizers[i+1:]...)
+				// Update the instance after removing finalizer
+				_, err := c.supervisorClient.CoreV1().PersistentVolumeClaims(c.supervisorNamespace).Update(ctx, svPVC, metav1.UpdateOptions{})
+				if err != nil {
+					msg := fmt.Sprintf("failed to update supervisor PVC %q in %q namespace. Error: %+v",
+						req.VolumeId, c.supervisorNamespace, err)
+					log.Error(msg)
+					return nil, csifault.CSIInternalFault, status.Error(codes.Internal, msg)
+				}
+				break
+			}
+		}
+
+		// Delete Supervisor PVC
 		err = c.supervisorClient.CoreV1().PersistentVolumeClaims(c.supervisorNamespace).Delete(
 			ctx, req.VolumeId, *metav1.NewDeleteOptions(0))
 		if err != nil {
@@ -1574,6 +1594,25 @@ func (c *controller) DeleteSnapshot(ctx context.Context, req *csi.DeleteSnapshot
 					c.supervisorNamespace, supervisorVolumeSnapshotName, err)
 				log.Error(msg)
 				return nil, status.Errorf(codes.Internal, msg)
+			}
+		}
+		// Remove the finalizer before deleting the Supervisor VolumeSnapshot
+		for i, finalizer := range supervisorVolumeSnapshot.ObjectMeta.Finalizers {
+			if finalizer == cnsoperatortypes.CNSSnapshotFinalizer {
+				log.Debugf("Removing %q finalizer from VolumeSnapshot with name: %q on namespace: %q",
+					cnsoperatortypes.CNSSnapshotFinalizer, supervisorVolumeSnapshotName, c.supervisorNamespace)
+				supervisorVolumeSnapshot.ObjectMeta.Finalizers = append(supervisorVolumeSnapshot.ObjectMeta.Finalizers[:i],
+					supervisorVolumeSnapshot.ObjectMeta.Finalizers[i+1:]...)
+				// Update the instance after removing finalizer
+				_, err := c.supervisorSnapshotterClient.SnapshotV1().VolumeSnapshots(c.supervisorNamespace).Update(ctx,
+					supervisorVolumeSnapshot, metav1.UpdateOptions{})
+				if err != nil {
+					msg := fmt.Sprintf("failed to update supervisor VolumeSnapshot %q in %q namespace. Error: %+v",
+						supervisorVolumeSnapshotName, c.supervisorNamespace, err)
+					log.Error(msg)
+					return nil, csifault.CSIInternalFault, status.Error(codes.Internal, msg)
+				}
+				break
 			}
 		}
 		log.Infof("Found the supervisor volumesnapshot %s/%s on the supervisor cluster",
