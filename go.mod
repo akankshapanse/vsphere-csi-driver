@@ -11,7 +11,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-co-op/gocron v1.37.0
 	github.com/go-logr/zapr v1.3.0
-	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-version v1.6.0
 	github.com/kubernetes-csi/csi-proxy/v2 v2.0.0-alpha.1
@@ -145,6 +144,7 @@ require (
 	github.com/thecodeteam/gofsutil v0.1.2 // indirect
 	github.com/vishvananda/netlink v1.1.0 // indirect
 	github.com/vishvananda/netns v0.0.4 // indirect
+	github.com/vmware-tanzu/vm-operator/pkg/constants/testlabels v0.0.0-20250313190623-6b764225354a // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.14 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.14 // indirect

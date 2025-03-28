@@ -10,7 +10,7 @@ import (
 	math "math"
 
 	spec "github.com/container-storage-interface/spec/lib/go/csi"
-	proto "github.com/golang/protobuf/proto"
+	proto "google.golang.org/protobuf/proto"
 	grpc "google.golang.org/grpc"
 )
 

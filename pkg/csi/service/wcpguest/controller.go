@@ -29,13 +29,13 @@ import (
 	"github.com/container-storage-interface/spec/lib/go/csi"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/fsnotify/fsnotify"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	snapshotterClientSet "github.com/kubernetes-csi/external-snapshotter/client/v8/clientset/versioned"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	vmoperatortypes "github.com/vmware-tanzu/vm-operator/api/v1alpha1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -1423,7 +1423,7 @@ func (c *controller) GetCapacity(ctx context.Context, req *csi.GetCapacityReques
 
 	return &csi.GetCapacityResponse{
 		AvailableCapacity: totalcapacity,
-		MaximumVolumeSize: &wrappers.Int64Value{Value: maxvolumesize},
+		MaximumVolumeSize: &wrapperspb.Int64Value{Value: maxvolumesize},
 	}, nil
 }
 
