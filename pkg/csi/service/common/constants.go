@@ -482,6 +482,10 @@ const (
 	// HighPVNodeDensity is an FSS for guest cluster nodes that, when enabled,
 	// raises MAX_VOLUMES_PER_NODE from 59 to 255 in NodeGetInfo responses.
 	HighPVNodeDensity = "high-pv-node-density"
+	// CSI_Backup_API is an WCP capability that tells whether CSI_Backup_API feature is supported in CSI.
+	CSI_Backup_API = "supports_CSI_Backup_API"
+	// CSI_Backup_API_FSS is an FSS for CSI_Backup_API support in pvcsi
+	CSI_Backup_API_FSS = "CSI_Backup_API"
 )
 
 var WCPFeatureStates = map[string]struct{}{
@@ -498,6 +502,7 @@ var WCPFeatureStates = map[string]struct{}{
 	FCDTransactionSupport:          {},
 	MultipleClustersPerVsphereZone: {},
 	FileVolumesWithVmService:       {},
+	CSI_Backup_API:                 {},
 }
 
 // WCPFeatureStatesSupportsLateEnablement contains capabilities that can be enabled later
@@ -512,6 +517,7 @@ var WCPFeatureStatesSupportsLateEnablement = map[string]struct{}{
 	BYOKEncryption:                 {},
 	SharedDiskFss:                  {},
 	FileVolumesWithVmService:       {},
+	CSI_Backup_API:                 {},
 }
 
 // WCPFeatureAssociatedWithPVCSI contains FSS name used in PVCSI and associated WCP Capability name on a
@@ -521,4 +527,5 @@ var WCPFeatureStatesSupportsLateEnablement = map[string]struct{}{
 var WCPFeatureStateAssociatedWithPVCSI = map[string]string{
 	WorkloadDomainIsolationFSS: WorkloadDomainIsolation,
 	LinkedCloneSupportFSS:      LinkedCloneSupport,
+	CSI_Backup_API_FSS:         CSI_Backup_API,
 }
